@@ -1,6 +1,7 @@
 package org.java.spring_test6;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.java.spring_test6.db.pojo.Prodotti;
 import org.java.spring_test6.db.pojo.Recensioni;
@@ -26,8 +27,8 @@ public class SpringTest6Application implements CommandLineRunner{
 	@Override
 	public void run(String... args) throws Exception {
 
-		// testCRUDProdotti();
-		// testMInMaxAvg();
+		testCRUDProdotti();
+		testMInMaxAvg();
 		testCRUDRecensioni();
 		System.out.println("\nEND");
 	}
@@ -59,6 +60,24 @@ public class SpringTest6Application implements CommandLineRunner{
 
 		p3.setQuantity(0);
 
+		// update
+		Optional<Prodotti> oldPOpt = prs.getByID(p2.getId());
+
+		if (oldPOpt.isEmpty()) {
+			System.out.println("Prodotto inesistente");
+			return;
+		}
+		
+		Prodotti oldP = oldPOpt.get();
+		System.out.println(oldP);
+		
+		oldP.setName("Orsacchiotto2");
+		oldP.setPrice(10.0);
+		
+		prs.save(oldP);
+		System.out.println("Prodotto modificato: " + oldP);
+			
+
 		// testo un errore
 		try {
 			p3.setQuantity(-3);
@@ -68,7 +87,7 @@ public class SpringTest6Application implements CommandLineRunner{
 		}
 
 		// delete
-		prs.delete(p2);
+		prs.delete(p3);
 	}
 
 	public void testMInMaxAvg(){
@@ -79,9 +98,12 @@ public class SpringTest6Application implements CommandLineRunner{
 
 	public void testCRUDRecensioni(){
 
-		Prodotti p1 = new Prodotti("go-pro", "telecamera ad alti frames per garantire ottime riprese in movimento", 235.78, 10, 268, "new");
-		Prodotti p3 = new Prodotti("quaderno", "quaderno formato A-4 Quadretti 10mm", 1.20, 20, 5204, "new");
-		Prodotti p4 = new Prodotti("spazzola", "bla bla bla", 2.20, 25, 8204, "new");
+		Prodotti p1 = new Prodotti("go-pro2", "telecamera ad alti frames per garantire ottime riprese in movimento", 235.78, 10, 268, "new");
+		Prodotti p3 = new Prodotti("quaderno2", "quaderno formato A-4 Quadretti 10mm", 1.20, 20, 5204, "new");
+		Prodotti p4 = new Prodotti("spazzola2", "bla bla bla", 2.20, 25, 8204, "new");
+		prs.save(p4);
+		prs.save(p3);
+		prs.save(p1);
 
 		try {
 			Recensioni r1 = new Recensioni(5, "Prodotto ottimo", p1);
@@ -130,10 +152,17 @@ public class SpringTest6Application implements CommandLineRunner{
 
 			System.out.println("------------------------------------------");
 
+			// Elimina un prodotto con le recensioni collegate
+		
+			prs.deleteProductAndReviews(p3.getId());
+			System.out.println(p3);
+
 		} catch (Exception e) {
 
 			System.out.println("Error in testRelations: " + e.getMessage());
 		}
+
+	
 	}
 
 }

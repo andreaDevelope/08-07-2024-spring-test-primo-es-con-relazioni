@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.hibernate.Hibernate;
 import org.java.spring_test6.db.pojo.Prodotti;
+import org.java.spring_test6.db.pojo.Recensioni;
 import org.java.spring_test6.db.repo.ProdottiRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,27 +14,28 @@ import jakarta.transaction.Transactional;
 
 @Service
 public class ProdottiService {
+
     @Autowired
     private ProdottiRepo pr;
+
+    @Autowired
+    private ReviewService rs;
 
     // PER STAMPARE TUTTE LE RECENSIONI ASSOCIATE AL PRODOTTO
     @Transactional
     public List<Prodotti> getAllProductsWReviews() {
+        List<Prodotti> prodotti = pr.findAll();
 
-    List<Prodotti> prodotti = pr.findAll();
-
-    for (Prodotti prodotto : prodotti) {
-
-        Hibernate.initialize(prodotto.getRecensioni());
-    }
+        for (Prodotti prodotto : prodotti) {
+            Hibernate.initialize(prodotto.getRecensioni());
+        }
 
         return prodotti;
     }
 
-    // PER ELIMINARE TUTTE LE RECENSIONI ASSOCIATE AL PRODOTTO 
+    // PER OTTENERE TUTTE LE RECENSIONI ASSOCIATE AL PRODOTTO 
     @Transactional
     public Optional<Prodotti> getRecensioniProdotto(int id) {
-
         Optional<Prodotti> optProdotti = getByID(id);
 
         if (optProdotti.isEmpty())
@@ -42,6 +44,19 @@ public class ProdottiService {
         Hibernate.initialize(optProdotti.get().getRecensioni());
 
         return optProdotti;
+    }
+
+    // PER ELIMINARE IL PRODOTTO E TUTTE LE RECENSIONI ASSOCIATE
+    @Transactional
+    public void deleteProductAndReviews(int productId) {
+        Optional<Prodotti> optProdotti = getByID(productId);
+        if (optProdotti.isPresent()) {
+            Prodotti prodotto = optProdotti.get();
+            for (Recensioni recensione : prodotto.getRecensioni()) {
+                rs.delete(recensione);
+            }
+            pr.delete(prodotto);
+        }
     }
 
     public List<Prodotti> getAll(){
@@ -61,7 +76,6 @@ public class ProdottiService {
     }
 
     // metodi jpa per max, min, e media
-
     public double getMinPrice() {
         return pr.findMinPrice();
     }
@@ -73,5 +87,4 @@ public class ProdottiService {
     public double getAvgPrice() {
         return pr.findAvgPrice();
     }
-
 }
