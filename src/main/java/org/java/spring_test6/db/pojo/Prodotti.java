@@ -1,29 +1,43 @@
 package org.java.spring_test6.db.pojo;
 
+import java.util.List;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class Prodotti {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(length = 64, nullable = false, unique = true)
     private String name;
+
+    @Column(columnDefinition = "TEXT", nullable = true)
     private String description;
+
     private double price;
     private int rebate;
     private int quantity;
+
+    @Column(length = 32, nullable = false)
     private String conditions;
+
     private double finalPrice;
+
+    @OneToMany(mappedBy = "prodotto")
+    private List<Recensioni> recensioni;
 
     public Prodotti(){
 
     }
 
     public Prodotti(String name, String description, double price, int rebate, int quantity, String conditions){
-        finalPrice = (price * rebate) / 100;
         setId(id);
         setName(name);
         setDescription(description);
@@ -31,6 +45,7 @@ public class Prodotti {
         setRebate(rebate);
         setQuantity(quantity);
         setConditions(conditions);
+        calculateFinalPrice();
     }
 
     public int getId() {
@@ -81,6 +96,14 @@ public class Prodotti {
         this.description = description;
     }
 
+    public List<Recensioni> getRecensioni() {
+        return recensioni;
+    }
+
+    public void setRecensioni(List<Recensioni> r) {
+        this.recensioni = r;
+    }
+
     public void setPrice(double price) {
         if (price < 0.1) {
             throw new IllegalArgumentException("questo valore deve essere positivo");
@@ -103,6 +126,12 @@ public class Prodotti {
             System.out.println("questo prodotto è terminato");
         }
         this.quantity = quantity;
+    }
+
+    private void calculateFinalPrice() {
+        if (price >= 0 && rebate >= 0) {
+            finalPrice = price * (1 - rebate / 100.0);
+        }
     }
 
     public void setConditions(String condition) {
