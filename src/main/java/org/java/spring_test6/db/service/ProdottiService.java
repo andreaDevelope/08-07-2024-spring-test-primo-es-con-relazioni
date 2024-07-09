@@ -16,6 +16,7 @@ public class ProdottiService {
     @Autowired
     private ProdottiRepo pr;
 
+    // PER STAMPARE TUTTE LE RECENSIONI ASSOCIATE AL PRODOTTO
     @Transactional
     public List<Prodotti> getAllProductsWReviews() {
 
@@ -27,6 +28,20 @@ public class ProdottiService {
     }
 
         return prodotti;
+    }
+
+    // PER ELIMINARE TUTTE LE RECENSIONI ASSOCIATE AL PRODOTTO 
+    @Transactional
+    public Optional<Prodotti> getRecensioniProdotto(int id) {
+
+        Optional<Prodotti> optProdotti = getByID(id);
+
+        if (optProdotti.isEmpty())
+            return Optional.empty();
+
+        Hibernate.initialize(optProdotti.get().getRecensioni());
+
+        return optProdotti;
     }
 
     public List<Prodotti> getAll(){
